@@ -73,6 +73,9 @@ class App:
 
         # ✅ GUI 시작 시 자동으로 봇 시작
         self.start_bot()
+        
+        # ✅ X 버튼关闭窗口 시 실행할 함수 등록
+        root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
 
     def text_set(self, commend):
@@ -142,19 +145,15 @@ class App:
         timestamp = datetime.now().strftime("%H:%M:%S")
         print(f"[{timestamp}] 🟢 봇이 시작되었습니다.")
 
-    def stop_bot(self):
-        """봇 프로세스 종료"""
-        if not self.is_running or self.bot_process is None:
-            print("❌ 실행 중인 봇이 없습니다.")
-            return
+    def on_closing(self):
+        """X 버튼关闭窗口 시 봇도 함께 종료"""
+        print("🔴 GUI를 закрытие합니다. 봇도 종료...")
         
-        try:
-            self.bot_process.terminate()
-            self.is_running = False
-            timestamp = datetime.now().strftime("%H:%M:%S")
-            print(f"[{timestamp}] 🔴 봇이 종료되었습니다.")
-        except Exception as e:
-            print(f"❌ 봇 종료 실패: {str(e)}")
+        # discordbot에 종료 명령어 전송
+        discode_bot_test_git.str_commend_line = "!turn_off"
+        
+        #，稍등 후 GUI 종료
+        self.root.after(500, self.root.destroy)
 
     def run(self):
         """
