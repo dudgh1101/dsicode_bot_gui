@@ -1,0 +1,112 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  "categories": {
+    "visual-engineering": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "ultrabrain": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "deep": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "artistry": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "quick": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "unspecified-low": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "unspecified-high": {
+      "model": "gemini-2.0-flash-exp"
+    },
+    "writing": {
+      "model": "gemini-2.0-flash-exp"
+    }
+  },
+  "agents": {
+    "hephaestus": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "oracle": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "librarian": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "explore": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "multimodal-looker": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "prometheus": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "metis": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "momus": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    },
+    "atlas": {
+      "model": "gemini-2.0-flash-exp",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "webfetch": "allow",
+        "external_directory": "allow"
+      }
+    }
+  }
+}
