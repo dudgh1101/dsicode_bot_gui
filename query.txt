@@ -32,6 +32,20 @@ CREATE TABLE `status_rule` (
   `status_at` time DEFAULT now(), -- 언제 정의되었는지
   UNIQUE KEY `st_type` (`status_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+alter table status_rule
+add constraint pk_status_id primary key (status_id);
+
+create table status_rule(
+	status_id char(5) not null,  -- 상태 고유 식별자
+	status_type char(5) not null,  -- 상태 코드
+	status_name varchar(20) not null, -- 상태 코드에 대한 정의
+	status_at time default now(), -- 언제 정의되었는지
+	constraint pk_status_id primary key (status_id),
+	constraint pk_status_type primary key (status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 drop table status_rule;
 drop table users;
 drop table firends;
@@ -89,6 +103,7 @@ create table friends(
 	from_user varchar(30), -- 누가 보냈는지
 	to_user varchar(30), -- 누가 받았는지
 	we_friend char(5) not null, -- 현재 상태
+	constraint pk_from_user_to_user primary key (from_user,to_user),
 	constraint fk_from_user foreign key (from_user) references users(user_id),	constraint fk_to_user foreign key (to_user) references users(user_id),
 	constraint fk_we_friend foreign key (we_friend) references status_rule(status_type)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -143,11 +158,12 @@ create table room_log(
 	constraint pk_room_log_id primary key (room_log_id),
 	constraint fk_room_name_room_log foreign key (room_name) references room_mg(room_name),
 	constraint fk_user_id_room_log foreign key (user_id) references users(user_id),
-	constraint fk_act_room_log foreign key (room_name) references act_log_rule(act_log_type),
+	constraint fk_act_room_log foreign key (act) references act_log_rule(act_log_type),
 	constraint fk_result_room_log foreign key (room_name) references result_rule(result_type)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 drop table room_log;
 drop table room_gavige;
+
 
 create table room_gavige(
 	room_gavige_id varchar(10) not null, -- 수정, 삭제 원본 데이터 고유 식별자(이하는 다 같음)
@@ -170,7 +186,7 @@ create table message(
 	send_at time default now(), -- 보낸 시간
 	constraint pk_message_id primary key (message_id),
 	constraint fk_from_user_id_message foreign key (from_user_id) references users(user_id),
-	constraint fk_to_user_id_message foreign key (to_user_id) references users(user_id),
+	constraint fk_to_user_id_message foreign key (to_user_id) references room_mg(room_name),
 	constraint fk_read_at foreign key (read_at) references status_rule(status_type)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 select * from message;
