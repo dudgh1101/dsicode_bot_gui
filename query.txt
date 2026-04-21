@@ -1,0 +1,209 @@
+-- 이름 정의 규칙
+ - 해당 직관적인 단어일 것
+ - 주석문을 달아둘 것
+ - 키의 이름을 정의할 때 해당 키 + 해당 컬럼 + 겹친다면 테이블 이름까지 => ex) fk_message_name_MessageTable
+
+
+-- 결과 정의 테이블
+create table result_rule(
+	result_type_id char(5) not null, -- 고유 식별 정보
+	result_type char(5) unique, -- 결과 코드
+	result_name varchar(20) not null, -- 결과 코드에 대한 정의
+	result_at time DEFAULT NOW(), -- 언제 정의되었는지
+	constraint pk_rsult_rule primary key(result_type_id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- 변경 사항
+-- result_rule 테이블에 성공을 포함해서 전체 결과에 대한 정의
+
+-- 로그 행동 정의 테이블
+CREATE TABLE act_log_rule (
+  act_log_id char(5) unique not null, --코드 고유 식별 정보
+  act_log_type char(5) not null, -- 고유 코드
+  act_log_name varchar(20) not null, -- 코드에 대한 정의
+  act_log_at time default now(), --언제 정의 되었는지
+  primary KEY act_log_type (act_log_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 유저 권한 및 상태 정의 테이블
+CREATE TABLE `status_rule` (
+  `status_id` char(5) not NULL, -- 상태 고유 식별자
+  `status_type` char(5)not NULL, -- 상태 코드
+  `status_name` varchar(20) not NULL, -- 상태 코드에 대한 정의
+  `status_at` time DEFAULT now(), -- 언제 정의되었는지
+  UNIQUE KEY `st_type` (`status_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+drop table status_rule;
+drop table users;
+drop table firends;
+drop table user_gavige;
+
+
+-- 유저 테이블
+create table users(
+	user_id varchar(30), -- use유저 아이디(로그인용)
+	user_email varchar(50), -- 유저 이메일(본인인증용)
+	password varchar(100) not null, -- 비밀번호
+	nickname varchar(20) not null, -- 유저 닉네임(보이는 이름)
+	phone_number varchar(20), -- 유저 전화번호
+	u_status char(5) not null, -- 유저 상태(온라인, 오프라인,자리비움등등)
+	no_edit boolean default false, -- 상태에 대한 변경 허용상태
+	create_at time default NOW(), --언제 생성된 유저인지
+	will_read boolean default false, -- 읽을 메시지가 존재하는지
+	login_count int default 3, --로그인 제한 횟수(기본 3회)
+	constraint fk_users_status FOREIGN KEY (u_status) REFERENCES status_rule(status_type),
+	constraint pk_user_id primary key(user_id)
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 유저 삭제 및 수정되기 이전 원본 데이터 테이블
+create table user_gavige(
+	user_gavige_id varchar(10), -- 원본데이터 고유 코드(아래는 유저 테이블과 같음)
+	user_id varchar(30),
+	user_email varchar(50),
+	password varchar(100) not null,
+	nickname varchar(20) not null,
+	phone_number varchar(20),
+	u_status char(5) not null, -- 상태(삭제, 수정 등등)
+	no_edit boolean default false,
+	create_at time default NOW(),
+	will_read boolean default false,
+	login_count int default 3,
+	constraint pk_user_gavige_id primary key (user_gavige_id),
+	constraint fk_users_status_gavige FOREIGN KEY (u_status) REFERENCES status_rule(status_type)
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 유저 로그 테이블
+create table user_info_log(
+	user_info_log_id varchar(10), -- 로그 고유 아이디
+	act_type char(5), -- 행동 코드
+	act_day time default now(), -- 언제 했는지
+	user_id varchar(30), -- 누가했는지
+	result char(5), -- 결과 코드
+	CONSTRAINT `fk_info_act` FOREIGN KEY (`act_type`) REFERENCES `act_log_rule` (`act_log_type`),
+	CONSTRAINT `fk_info_result` FOREIGN KEY (`result`) REFERENCES `result_rule` (`result_type`),
+  CONSTRAINT `fk_info_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 친구 테이블
+create table friends(
+	from_user varchar(30), -- 누가 보냈는지
+	to_user varchar(30), -- 누가 받았는지
+	we_friend char(5) not null, -- 현재 상태
+	constraint fk_from_user foreign key (from_user) references users(user_id),	constraint fk_to_user foreign key (to_user) references users(user_id),
+	constraint fk_we_friend foreign key (we_friend) references status_rule(status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+drop table friends;
+drop table friends_log;
+
+-- 친구 로그 테이블
+create table friends_log(
+	friend_log_id varchar(10), -- 로그 고유 아이디
+	act_type char(5), -- 행동 종류
+	act_day time default now(), -- 언제 했는지
+	user_id varchar(30) not null, -- 누가 했는지
+	result char(5), -- 결고 코드
+	constraint fk_act_type foreign key (act_type) references act_log_rule(act_log_type),
+	constraint fk_user_id foreign key (user_id) references users(user_id),
+	constraint fk_result foreign key (result) references result_rule(result_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+drop table friends_log;
+
+-- 방 관리 테이블
+create table room_mg(
+	room_id varchar(20) not null, -- 방 고유 식별자
+	room_name varchar(20) unique not null, -- 방 이름
+	user_id varchar(30) not null, -- 방 생성자 아이디
+	day time default now(), --언제 만들어졌는지
+	user_count int default 1, -- 방 인원
+	constraint pk_room_id primary key(room_id),
+	constraint fk_user_id_room_mg foreign key (user_id) references users(user_id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 방에 소속된 유저 테이블
+create table room_id(
+	room_name varchar(20) not null, -- 방이름
+	user_id varchar(30) not null, -- 속한 유저
+	user_status char(5) not null, -- 해당 유저의 권한 상태
+	day time default now(), -- 언제 들어왔는지
+	constraint fk_room_name foreign key (room_name) references room_mg(room_name),
+	constraint fk_user_id_room_name foreign key (user_id) references users(user_id),
+	constraint fk_user_status_room_name foreign key (user_status) references status_rule(status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 방 로그 테이블
+create table room_log(
+	room_log_id varchar(10) not null, -- 방 로그 고유 식별자
+	room_name varchar(20) not null, -- 로그가 나온 방이름
+	user_id varchar(30) not null, -- 행한 유저
+	act char(5) not null, -- 행동 코드
+	to_user varchar(30),
+	day time default now(), -- 언제 했는지
+	result char(5) not null, -- 결과 코드
+	constraint pk_room_log_id primary key (room_log_id),
+	constraint fk_room_name_room_log foreign key (room_name) references room_mg(room_name),
+	constraint fk_user_id_room_log foreign key (user_id) references users(user_id),
+	constraint fk_act_room_log foreign key (room_name) references act_log_rule(act_log_type),
+	constraint fk_result_room_log foreign key (room_name) references result_rule(result_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+drop table room_log;
+drop table room_gavige;
+
+create table room_gavige(
+	room_gavige_id varchar(10) not null, -- 수정, 삭제 원본 데이터 고유 식별자(이하는 다 같음)
+	room_name varchar(20) not null,
+	user_id varchar(30) not null,
+	day time default now(),
+	user_count int default 1,
+	room_status char(5) not null, -- 상태(삭제, 수정 등..)
+	constraint fk_room_gavige_id foreign key (room_gavige_id) references room_log(room_log_id), -- 방이 삭제됬을 때 로그 아이디를 참조해서 바로 그 아이디로 이 가비지 데이터를 찾을 수 있음
+	constraint fk_room_status_room_gavige foreign key (room_status) references status_rule(status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+drop table room_gavige;
+-- 메시지 테이블
+create table message(
+	message_id varchar(10) not null, -- 메시지 고유 식별자
+	from_user_id varchar(30) not null, -- 보낸 유저 아이디
+	to_user_id varchar(30) not null, -- 받은 유저 아이디
+	content text not null, -- 메시지 내용
+	read_at char(5) not null, -- 읽음 여부(status_FK)
+	send_at time default now(), -- 보낸 시간
+	constraint pk_message_id primary key (message_id),
+	constraint fk_from_user_id_message foreign key (from_user_id) references users(user_id),
+	constraint fk_to_user_id_message foreign key (to_user_id) references users(user_id),
+	constraint fk_read_at foreign key (read_at) references status_rule(status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+select * from message;
+drop table message;
+
+-- 메시지 로그 테이블(send 이벤트 제외)
+create table message_log(
+	message_log_id varchar(10) not null, -- 로그 고유 아이디(가비지 테이블이랑 공유)
+	message_act char(5) not null, -- 행동 코드
+	from_user_id varchar(30) not null, -- 보낸 유저 아이디
+	to_user_id varchar(30) not null, -- 받은 유저 아이디
+	message_log_at time default now(), -- 언제 일어났는지
+	result char(5) not null, -- 결과 코드
+	constraint pk_message_log_id primary key (message_log_id),
+	constraint fk_message_act foreign key (message_act) references act_log_rule(act_log_type),
+	constraint fk_from_user_id_message_log foreign key (from_user_id) references users(user_id),
+	constraint fk_to_user_id_message_log foreign key (to_user_id) references users(user_id),
+	constraint fk_result_message_log foreign key (result) references result_rule(result_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 삭제되거나 수정된 메시지 원본 데이터 테이블
+create table message_gavige(
+	message_gavige_id varchar(10) not null, -- 가비지 데이터 고유 식별자(로그 참조)
+	message_id varchar(10) not null, --  메시지 고유 식별자
+	from_user_id varchar(30) not null, -- 보낸 유저 아이디
+	to_user_id varchar(30) not null, -- 받은 유저 아이디
+	content text not null, -- 메시지 내용
+	read_at char(5) not null, -- 읽음 여부(status_FK)
+	send_at time default now(), -- 보낸 시간
+	constraint fk_message_gavige_id foreign key (message_gavige_id) references message_log(message_log_id),
+	constraint fk_read_at_message_gavige foreign key (read_at) references status_rule(status_type)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+drop table message_gavige;
+select * from message_gavige;
+
+show tables;
