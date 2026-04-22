@@ -137,12 +137,18 @@ create table room_mg(
 	room_id varchar(20) not null, -- 방 고유 식별자
 	room_name varchar(20) unique not null, -- 방 이름
 	user_id varchar(30) not null, -- 방 생성자 아이디
-	day time default now(), --언제 만들어졌는지
+	password varchar(100) not null, -- 비밀번호
+	day time default now(), -- 언제 만들어졌는지
 	user_count int default 1, -- 방 인원
 	constraint pk_room_id primary key(room_id),
 	constraint fk_user_id_room_mg foreign key (user_id) references users(user_id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+desc room_mg;
+drop table room_mg;
+drop table room_members;
+drop table room_log;
+drop table room_gavige;
 -- 방에 소속된 유저 테이블
 create table room_members(
 	room_id varchar(20) not null, -- 방이름
@@ -228,8 +234,18 @@ create table message_gavige(
 	constraint fk_message_gavige_id foreign key (message_gavige_id) references message_log(message_log_id),
 	constraint fk_read_at_message_gavige foreign key (read_at) references status_rule(status_type)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 drop table message_gavige;
 select * from message_gavige;
 select * from message_log;
+
+
+create table admin_join_request(
+	user_id varchar(30),
+	email varchar(50) not null,
+	nickname varchar(20) not null,
+	password varchar(100) not null,
+	constraint pk_user_id_admin_join_request primary key (user_id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 show tables;
